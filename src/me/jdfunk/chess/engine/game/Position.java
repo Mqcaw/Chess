@@ -1,7 +1,6 @@
 package me.jdfunk.chess.engine.game;
 
 public class Position {
-
     private int x;
     private int y;
 
@@ -15,21 +14,12 @@ public class Position {
         this.y = y;
     }
 
+    public Position offset(int dx, int dy) {
+        return new Position(x + dx, y + dy);
+    }
+
     public Position copy() {
         return new Position(x, y);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Position position = (Position) obj;
-        return x == position.x && y == position.y;
-    }
-
-    @Override
-    public int hashCode() {
-        return 31 + y + x;
     }
 
     public int getY() {
@@ -44,6 +34,19 @@ public class Position {
     }
     public void setX(int x) {
         this.x = x;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Position position = (Position) obj;
+        return x == position.x && y == position.y;
+    }
+
+    @Override
+    public int hashCode() {
+        return 31 + y + x;
     }
 
     @Override

@@ -1,6 +1,10 @@
 package me.jdfunk.chess.engine.piece;
 
+import me.jdfunk.chess.engine.game.Board;
+import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
+
+import java.util.List;
 
 public abstract class Piece {
     private Position position;
@@ -15,6 +19,25 @@ public abstract class Piece {
     }
 
     public abstract List<Move> getPseudoLegalMoves(Board board);
+
+    protected void addSlidingMoves(Board board, List<Move> moves, int[][] directions) {
+        Position pos = getPosition();
+        for (int[] dir : directions) {
+            Position current = pos.offset(dir[0], dir[1]);
+            while (board.isWithinBounds(current)) {
+                Piece target = board.getPieceAt(current);
+                if (target == null) {
+                    moves.add(new Move(pos, current, this, null));
+                } else {
+                    if (target.getColor() != getColor()) {
+                        moves.add(new Move(pos, current, this, target));
+                    }
+                    break;
+                }
+                current = current.offset(dir[0], dir[1]);
+            }
+        }
+    }
 
     public Position getPosition() {
         return position;
