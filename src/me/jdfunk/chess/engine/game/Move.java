@@ -2,6 +2,8 @@ package me.jdfunk.chess.engine.game;
 
 import me.jdfunk.chess.engine.piece.Piece;
 
+import java.util.Objects;
+
 public class Move {
     private Position from;
     private Position to;
@@ -102,5 +104,17 @@ public class Move {
     }
     public void setEnPassant(boolean enPassant) {
         isEnPassant = enPassant;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Move move = (Move) o;
+        return isCapture() == move.isCapture() && isCastling() == move.isCastling() && isEnPassant() == move.isEnPassant() && Objects.equals(getFrom(), move.getFrom()) && Objects.equals(getTo(), move.getTo()) && Objects.equals(getMovingPiece(), move.getMovingPiece()) && Objects.equals(getCapturedPiece(), move.getCapturedPiece()) && Objects.equals(getRookMoved(), move.getRookMoved());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getFrom(), getTo(), isCapture(), getMovingPiece(), getCapturedPiece(), isCastling(), getRookMoved(), isEnPassant());
     }
 }

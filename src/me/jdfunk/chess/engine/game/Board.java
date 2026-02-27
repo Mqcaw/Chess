@@ -1,6 +1,8 @@
 package me.jdfunk.chess.engine.game;
 
+import me.jdfunk.chess.engine.logic.MoveValidator;
 import me.jdfunk.chess.engine.piece.Piece;
+import me.jdfunk.chess.engine.piece.PieceColor;
 import me.jdfunk.chess.engine.piece.pieces.*;
 
 import java.util.ArrayList;
@@ -13,15 +15,58 @@ public class Board {
     public Board() {
         pieces = new ArrayList<>();
         moves = new ArrayList<>();
+        initBoard();
     }
 
     public Board(List<Piece> pieces, List<Move> moves) {
         this.pieces = pieces;
         this.moves = moves;
+        initBoard();
     }
 
     public void initBoard() {
+        for (int i = 0; i < 8; i++) {
+            //pieces.add(new Pawn(new Position(i, 1), PieceColor.WHITE));
+        }
 
+        pieces.add(new Rook(new Position(0, 0), PieceColor.WHITE));
+        pieces.add(new Knight(new Position(1, 0), PieceColor.WHITE));
+        pieces.add(new Bishop(new Position(2, 0), PieceColor.WHITE));
+        pieces.add(new Queen(new Position(4, 4), PieceColor.WHITE));
+        pieces.add(new King(new Position(4, 0), PieceColor.WHITE));
+        pieces.add(new Bishop(new Position(5, 0), PieceColor.WHITE));
+        pieces.add(new Knight(new Position(6, 0), PieceColor.WHITE));
+        pieces.add(new Rook(new Position(7, 0), PieceColor.WHITE));
+
+        for (int i = 0; i < 8; i++) {
+            //pieces.add(new Pawn(new Position(i, 6), PieceColor.BLACK));
+        }
+
+        pieces.add(new Rook(new Position(0, 7), PieceColor.BLACK));
+        pieces.add(new Knight(new Position(1, 7), PieceColor.BLACK));
+        pieces.add(new Bishop(new Position(2, 7), PieceColor.BLACK));
+        //pieces.add(new Queen(new Position(3, 7), PieceColor.BLACK));
+        pieces.add(new King(new Position(4, 7), PieceColor.BLACK));
+        pieces.add(new Bishop(new Position(5, 7), PieceColor.BLACK));
+        pieces.add(new Knight(new Position(6, 7), PieceColor.BLACK));
+        pieces.add(new Rook(new Position(7, 7), PieceColor.BLACK));
+    }
+
+    public boolean applyMove(Move move) {
+        if (!MoveValidator.isLegal(move, this)) return false;
+
+        move.getMovingPiece().setPosition(move.getTo());
+        if (move.getCapturedPiece() != null) {
+            removePieceAt(move.getCapturedPiece().getPosition());
+        }
+        if (move.getRookMoved() != null) {
+            Piece rook = getPieceAt(move.getRookMoved().getPosition());
+            boolean kingside = move.getTo().getX() > move.getFrom().getX();
+            int rookDestX = kingside ? move.getTo().getX() - 1 : move.getTo().getX() + 1;
+            rook.setPosition(new Position(rookDestX, move.getFrom().getY()));
+        }
+        moves.add(move);
+        return true;
     }
 
     public Board simulate(Move move) {

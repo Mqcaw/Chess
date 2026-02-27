@@ -48,7 +48,10 @@ public class Pawn extends Piece {
             }
 
             //En passant
-            Move lastMove = board.getLastMove();
+            Move lastMove = null;
+            if (board.getMoves().size() != 0) {
+                lastMove = board.getLastMove();
+            }
             if (lastMove != null) {
                 Piece lastMoved = lastMove.getMovingPiece();
                 if (lastMoved.getType() == PieceType.PAWN

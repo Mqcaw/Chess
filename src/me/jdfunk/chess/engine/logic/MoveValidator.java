@@ -12,7 +12,14 @@ import java.util.List;
 
 public class MoveValidator {
 
-    public List<Move> getLegalMoves(Piece piece, Board board) {
+    public static boolean isLegal(Move move, Board board) {
+        Piece piece = move.getMovingPiece();
+        List<Move> moves = getLegalMoves(piece, board);
+        return moves.contains(move);
+    }
+
+
+    public static List<Move> getLegalMoves(Piece piece, Board board) {
         List<Move> pseudoLegal = piece.getPseudoLegalMoves(board);
         List<Move> legal = new ArrayList<>();
 
@@ -35,14 +42,14 @@ public class MoveValidator {
         return legal;
     }
 
-    private boolean leavesKingInCheck(Move move, Board board) {
+    private static boolean leavesKingInCheck(Move move, Board board) {
         Board simulated = board.simulate(move);
         PieceColor movingColor = move.getMovingPiece().getColor();
         Position kingPos = findKing(movingColor, simulated);
         return isSquareAttacked(kingPos, movingColor, simulated);
     }
 
-    private boolean isSquareAttacked(Position pos, PieceColor defendingColor, Board board) {
+    private static boolean isSquareAttacked(Position pos, PieceColor defendingColor, Board board) {
         for (Piece piece : board.getPieces()) {
             if (piece.getColor() == defendingColor) continue;
             for (Move move : piece.getPseudoLegalMoves(board)) {
@@ -52,7 +59,7 @@ public class MoveValidator {
         return false;
     }
 
-    private Position findKing(PieceColor color, Board board) {
+    private static Position findKing(PieceColor color, Board board) {
         return board.getPieces().stream()
                 .filter(p -> p.getColor() == color && p.getType() == PieceType.KING)
                 .findFirst()
