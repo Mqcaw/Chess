@@ -18,9 +18,9 @@ public class Bishop extends Piece {
 
     @Override
     public List<Move> getPseudoLegalMoves(Board board) {
-        List<Move> moves = new ArrayList<>();
+        List<Move> moves;
         int[][] directions = {{1,1},{1,-1},{-1,1},{-1,-1}};
-        addSlidingMoves(board, moves, directions);
+        moves = addSlidingMoves(board, directions);
         return moves;
     }
 }

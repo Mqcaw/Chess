@@ -3,7 +3,9 @@ package me.jdfunk.chess.engine.piece;
 import me.jdfunk.chess.engine.game.Board;
 import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
+import me.jdfunk.chess.shared.logger.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Piece {
@@ -20,7 +22,8 @@ public abstract class Piece {
 
     public abstract List<Move> getPseudoLegalMoves(Board board);
 
-    protected void addSlidingMoves(Board board, List<Move> moves, int[][] directions) {
+    protected List<Move> addSlidingMoves(Board board, int[][] directions) {
+        List<Move> moves = new ArrayList<>();
         Position pos = getPosition();
         for (int[] dir : directions) {
             Position current = pos.offset(dir[0], dir[1]);
@@ -37,6 +40,7 @@ public abstract class Piece {
                 current = current.offset(dir[0], dir[1]);
             }
         }
+        return moves;
     }
 
     public Position getPosition() {
@@ -67,4 +71,31 @@ public abstract class Piece {
         this.hasMoved = hasMoved;
     }
 
+    @Override
+    public String toString() {
+        char t = ' ';
+        switch (type) {
+            case PAWN: t = 'P'; break;
+            case ROOK: t = 'R'; break;
+            case KNIGHT: t = 'N'; break;
+            case BISHOP: t = 'B'; break;
+            case QUEEN: t = 'Q'; break;
+            case KING: t = 'K'; break;
+
+        }
+        if (color == PieceColor.BLACK) t = Character.toLowerCase(t);
+
+        char p = ' ';
+        switch (position.getX()) {
+            case 0: p = 'a'; break;
+            case 1: p = 'b'; break;
+            case 2: p = 'c'; break;
+            case 3: p = 'd'; break;
+            case 4: p = 'e'; break;
+            case 5: p = 'f'; break;
+            case 6: p = 'g'; break;
+            case 7: p = 'h'; break;
+        }
+        return (t + "" + p + (position.getY() + 1));
+    }
 }

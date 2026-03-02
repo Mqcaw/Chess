@@ -18,9 +18,9 @@ public class Rook extends Piece {
 
     @Override
     public List<Move> getPseudoLegalMoves(Board board) {
-        List<Move> moves = new ArrayList<>();
+        List<Move> moves;
         int[][] directions = {{1,0},{-1,0},{0,1},{0,-1}};
-        addSlidingMoves(board, moves, directions);
+        moves = addSlidingMoves(board, directions);
         return moves;
     }
 }

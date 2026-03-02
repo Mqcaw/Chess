@@ -4,11 +4,13 @@ import me.jdfunk.chess.engine.logic.MoveValidator;
 import me.jdfunk.chess.engine.piece.Piece;
 import me.jdfunk.chess.engine.piece.PieceColor;
 import me.jdfunk.chess.engine.piece.pieces.*;
+import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Board {
+    private static final Logger logger = Logger.getLogger(Board.class);
     private List<Piece> pieces;
     private List<Move> moves;
 
@@ -21,95 +23,87 @@ public class Board {
     public Board(List<Piece> pieces, List<Move> moves) {
         this.pieces = pieces;
         this.moves = moves;
-        initBoard();
     }
 
     public void initBoard() {
         for (int i = 0; i < 8; i++) {
-            //pieces.add(new Pawn(new Position(i, 1), PieceColor.WHITE));
+            pieces.add(new Pawn(new Position(i, 1), PieceColor.WHITE));
         }
 
         pieces.add(new Rook(new Position(0, 0), PieceColor.WHITE));
         pieces.add(new Knight(new Position(1, 0), PieceColor.WHITE));
         pieces.add(new Bishop(new Position(2, 0), PieceColor.WHITE));
-        pieces.add(new Queen(new Position(4, 4), PieceColor.WHITE));
+        pieces.add(new Queen(new Position(3, 0), PieceColor.WHITE));
         pieces.add(new King(new Position(4, 0), PieceColor.WHITE));
         pieces.add(new Bishop(new Position(5, 0), PieceColor.WHITE));
         pieces.add(new Knight(new Position(6, 0), PieceColor.WHITE));
         pieces.add(new Rook(new Position(7, 0), PieceColor.WHITE));
 
         for (int i = 0; i < 8; i++) {
-            //pieces.add(new Pawn(new Position(i, 6), PieceColor.BLACK));
+            pieces.add(new Pawn(new Position(i, 6), PieceColor.BLACK));
         }
 
         pieces.add(new Rook(new Position(0, 7), PieceColor.BLACK));
         pieces.add(new Knight(new Position(1, 7), PieceColor.BLACK));
         pieces.add(new Bishop(new Position(2, 7), PieceColor.BLACK));
-        //pieces.add(new Queen(new Position(3, 7), PieceColor.BLACK));
+        pieces.add(new Queen(new Position(3, 7), PieceColor.BLACK));
         pieces.add(new King(new Position(4, 7), PieceColor.BLACK));
         pieces.add(new Bishop(new Position(5, 7), PieceColor.BLACK));
         pieces.add(new Knight(new Position(6, 7), PieceColor.BLACK));
         pieces.add(new Rook(new Position(7, 7), PieceColor.BLACK));
     }
 
-    public boolean applyMove(Move move) {
-        if (!MoveValidator.isLegal(move, this)) return false;
+    public boolean applyMoveUnchecked(Move move) {
+        //Do not trust move.getMovingPiece()/getCapturedPiece() references here
+        Piece moving = getPieceAt(move.getFrom());
+        if (moving == null) {
+            logger.error("No moving piece found at " + move.getFrom(), new Exception("No moving piece found at " + move.getFrom() + " during applyMoveUnchecked"));
+        }
 
-        move.getMovingPiece().setPosition(move.getTo());
-        if (move.getCapturedPiece() != null) {
-            removePieceAt(move.getCapturedPiece().getPosition());
+        Piece captured = getPieceAt(move.getTo());
+        if (captured != null) {
+            removePieceAt(captured.getPosition());
         }
-        if (move.getRookMoved() != null) {
-            Piece rook = getPieceAt(move.getRookMoved().getPosition());
-            boolean kingside = move.getTo().getX() > move.getFrom().getX();
-            int rookDestX = kingside ? move.getTo().getX() - 1 : move.getTo().getX() + 1;
-            rook.setPosition(new Position(rookDestX, move.getFrom().getY()));
+
+        moving.setPosition(move.getTo());
+
+        // Castling handling based on coordinates rather than move's piece references.
+        // (King moves two squares horizontally.)
+        int dx = move.getTo().getX() - move.getFrom().getX();
+        if (moving.getType() == me.jdfunk.chess.engine.piece.PieceType.KING && Math.abs(dx) == 2) {
+            boolean kingside = dx > 0;
+            int rookFromX = kingside ? 7 : 0;
+            int rookToX = kingside ? move.getTo().getX() - 1 : move.getTo().getX() + 1;
+
+            Piece rook = getPieceAt(new Position(rookFromX, move.getFrom().getY()));
+            if (rook != null) {
+                rook.setPosition(new Position(rookToX, move.getFrom().getY()));
+            }
         }
+
         moves.add(move);
         return true;
     }
 
+    public boolean applyMove(Move move) {
+        //can trust move.getMovingPiece()/getCapturedPiece() references here
+        if (!MoveValidator.isLegal(move, this)) return false;
+        return applyMoveUnchecked(move);
+    }
+
     public Board simulate(Move move) {
         Board copy = this.deepCopy();
-
-        Piece movingPiece = copy.getPieceAt(move.getFrom());
-
-        //Remove captured piece
-        if (move.getCapturedPiece() != null) {
-            copy.removePieceAt(move.getCapturedPiece().getPosition());
-        }
-
-        //Move the piece
-        movingPiece.setPosition(move.getTo());
-
-        //Handle castling
-        if (move.getRookMoved() != null) {
-            Piece rook = copy.getPieceAt(move.getRookMoved().getPosition());
-            boolean kingside = move.getTo().getX() > move.getFrom().getX();
-            int rookDestX = kingside ? move.getTo().getX() - 1 : move.getTo().getX() + 1;
-            rook.setPosition(new Position(rookDestX, move.getFrom().getY()));
-        }
-
+        copy.applyMoveUnchecked(move);
         return copy;
     }
 
     public Board deepCopy() {
         List<Piece> copiedPieces = new ArrayList<>();
-
         for (Piece piece : this.pieces) {
             copiedPieces.add(copyPiece(piece));
         }
 
-        //Copy move history
-        List<Move> copiedMoves = new ArrayList<>(this.moves);
-
-        Board copy = new Board(copiedPieces, copiedMoves);
-
-        //Re-resolve piece references inside the last move to point to the copied pieces
-        if (!copiedMoves.isEmpty()) {
-            Move lastMove = copiedMoves.get(copiedMoves.size() - 1);
-            copy.remapLastMove(copiedPieces, lastMove);
-        }
+        Board copy = new Board(copiedPieces, new ArrayList<>());
 
         return copy;
     }
@@ -131,28 +125,12 @@ public class Board {
         return copy;
     }
 
-    private void remapLastMove(List<Piece> copiedPieces, Move lastMove) {
-        Piece remappedMoving = findByPosition(copiedPieces, lastMove.getMovingPiece().getPosition());
-        Piece remappedCaptured = lastMove.getCapturedPiece() != null
-                ? findByPosition(copiedPieces, lastMove.getCapturedPiece().getPosition())
-                : null;
-        Piece remappedRook = lastMove.getRookMoved() != null
-                ? findByPosition(copiedPieces, lastMove.getRookMoved().getPosition())
-                : null;
-
-        lastMove.remapPieceReferences(remappedMoving, remappedCaptured, remappedRook);
-    }
-
-    private Piece findByPosition(List<Piece> pieces, Position pos) {
-        return pieces.stream()
-                .filter(p -> p.getPosition().equals(pos))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("No piece found at " + pos + " during deep copy"));
-    }
-
     public Piece getPieceAt(Position position) {
+        //return pieces.stream().filter(p -> p.getPosition().equals(position)).findFirst().orElse(null);
         for (Piece piece : pieces) {
-            if (piece.getPosition().equals(position)) return piece;
+            if (piece.getPosition().equals(position)) {
+                return piece;
+            }
         }
         return null;
     }

@@ -18,15 +18,15 @@ public class Main {
         renderer.init();
 
         GameState gameState = new GameState();
+        System.out.println(gameState.getBoard().getPieces());
 
         renderer.render(gameState);
 
         //Position position = new Position(4, 1);
         //gameState.makeMove(new Move(position, position.offset(0, 2), gameState.getBoard().getPieceAt(position), null));
 
-        gameState.selectPiece(gameState.getBoard().getPieces().indexOf(gameState.getBoard().getPieceAt(new Position(4, 4))));
+        gameState.selectPiece((new Position(4, 1)));
 
-        //TODO: heap runs out of memory when trying to get queen moves to render selected piece possible moves
         renderer.render(gameState);
     }
 }

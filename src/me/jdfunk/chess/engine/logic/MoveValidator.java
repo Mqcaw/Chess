@@ -6,6 +6,7 @@ import me.jdfunk.chess.engine.game.Position;
 import me.jdfunk.chess.engine.piece.Piece;
 import me.jdfunk.chess.engine.piece.PieceColor;
 import me.jdfunk.chess.engine.piece.PieceType;
+import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -6,6 +6,7 @@ import me.jdfunk.chess.engine.game.Position;
 import me.jdfunk.chess.engine.piece.Piece;
 import me.jdfunk.chess.engine.piece.PieceColor;
 import me.jdfunk.chess.engine.piece.PieceType;
+import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,9 +19,9 @@ public class Queen extends Piece {
 
     @Override
     public List<Move> getPseudoLegalMoves(Board board) {
-        List<Move> moves = new ArrayList<>();
+        List<Move> moves;
         int[][] directions = {{1,0},{-1,0},{0,1},{0,-1},{1,1},{1,-1},{-1,1},{-1,-1}};
-        addSlidingMoves(board, moves, directions);
+        moves = addSlidingMoves(board, directions);
         return moves;
     }
 }

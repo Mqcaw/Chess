@@ -2,8 +2,11 @@ package me.jdfunk.chess.engine.game;
 
 import me.jdfunk.chess.engine.piece.Piece;
 import me.jdfunk.chess.engine.piece.PieceColor;
+import me.jdfunk.chess.shared.logger.Logger;
 
 public class GameState {
+    private static final Logger logger = Logger.getLogger(GameState.class);
+
     private Board board;
     private PieceColor playerToMove = PieceColor.WHITE;
     private Piece selectedPiece;
@@ -17,15 +20,22 @@ public class GameState {
         this.board = new Board();
     }
 
-    public void selectPiece(int index) {
-        selectedPiece = board.getPieces().get(index);
+    public void selectPiece(Position position) {
+        selectedPiece = board.getPieceAt(position);
+        if (selectedPiece == null) {
+            logger.error("Could not select piece, likely no piece not found at position: " + position);
+        }
     }
 
     public boolean makeMove(Move move) {
         if (move.getMovingPiece().getColor() != playerToMove) return false;
 
         boolean success = board.applyMove(move);
-        if (success) changeTurn();
+        if (success){
+            changeTurn();
+        } else {
+            logger.error("Could not apply move, " + move);
+        }
 
         return success;
     }

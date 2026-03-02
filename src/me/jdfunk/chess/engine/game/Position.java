@@ -5,11 +5,6 @@ public class Position {
     private int y;
 
     public Position(int x, int y) {
-        if (y < 0) y = 0;
-        if (y >= 8) y = 7;
-        if (x < 0) x = 0;
-        if (x >= 8) x = 7;
-
         this.x = x;
         this.y = y;
     }
