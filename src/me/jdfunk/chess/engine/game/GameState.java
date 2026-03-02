@@ -11,11 +11,6 @@ public class GameState {
     private PieceColor playerToMove = PieceColor.WHITE;
     private Piece selectedPiece;
 
-
-    public GameState(Board board) {
-        this.board = board;
-    }
-
     public GameState() {
         this.board = new Board();
     }

@@ -13,10 +13,6 @@ public class Position {
         return new Position(x + dx, y + dy);
     }
 
-    public Position copy() {
-        return new Position(x, y);
-    }
-
     public int getY() {
         return y;
     }

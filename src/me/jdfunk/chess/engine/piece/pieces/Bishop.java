@@ -7,7 +7,6 @@ import me.jdfunk.chess.engine.piece.Piece;
 import me.jdfunk.chess.engine.piece.PieceColor;
 import me.jdfunk.chess.engine.piece.PieceType;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class Bishop extends Piece {

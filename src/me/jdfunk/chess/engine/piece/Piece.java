@@ -3,7 +3,6 @@ package me.jdfunk.chess.engine.piece;
 import me.jdfunk.chess.engine.game.Board;
 import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
-import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,29 +72,27 @@ public abstract class Piece {
 
     @Override
     public String toString() {
-        char t = ' ';
-        switch (type) {
-            case PAWN: t = 'P'; break;
-            case ROOK: t = 'R'; break;
-            case KNIGHT: t = 'N'; break;
-            case BISHOP: t = 'B'; break;
-            case QUEEN: t = 'Q'; break;
-            case KING: t = 'K'; break;
-
-        }
+        char t = switch (type) {
+            case PAWN -> 'P';
+            case ROOK -> 'R';
+            case KNIGHT -> 'N';
+            case BISHOP -> 'B';
+            case QUEEN -> 'Q';
+            case KING -> 'K';
+        };
         if (color == PieceColor.BLACK) t = Character.toLowerCase(t);
 
-        char p = ' ';
-        switch (position.getX()) {
-            case 0: p = 'a'; break;
-            case 1: p = 'b'; break;
-            case 2: p = 'c'; break;
-            case 3: p = 'd'; break;
-            case 4: p = 'e'; break;
-            case 5: p = 'f'; break;
-            case 6: p = 'g'; break;
-            case 7: p = 'h'; break;
-        }
+        char p = switch (position.getX()) {
+            case 0 -> 'a';
+            case 1 -> 'b';
+            case 2 -> 'c';
+            case 3 -> 'd';
+            case 4 -> 'e';
+            case 5 -> 'f';
+            case 6 -> 'g';
+            case 7 -> 'h';
+            default -> ' ';
+        };
         return (t + "" + p + (position.getY() + 1));
     }
 }

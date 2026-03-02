@@ -44,12 +44,6 @@ public class Move {
         this.rookMoved = rookMoved;
     }
 
-    public void remapPieceReferences(Piece movingPiece, Piece capturedPiece, Piece rookMoved) {
-        this.movingPiece = movingPiece;
-        this.capturedPiece = capturedPiece;
-        this.rookMoved = rookMoved;
-    }
-
     public Position getFrom() {
         return from;
     }

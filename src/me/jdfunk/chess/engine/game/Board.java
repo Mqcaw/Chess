@@ -103,9 +103,7 @@ public class Board {
             copiedPieces.add(copyPiece(piece));
         }
 
-        Board copy = new Board(copiedPieces, new ArrayList<>());
-
-        return copy;
+        return new Board(copiedPieces, new ArrayList<>());
     }
 
     private Piece copyPiece(Piece piece) {
@@ -144,7 +142,7 @@ public class Board {
     }
 
     public Move getLastMove() {
-        return moves.get(moves.size() - 1);
+        return moves.getLast();
     }
 
     public List<Piece> getPieces() {

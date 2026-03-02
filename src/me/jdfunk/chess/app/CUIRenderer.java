@@ -30,7 +30,7 @@ public class CUIRenderer extends Renderer{
     public void render(GameState gameState) {
         if (!initialized) {logger.error("CUI Renderer not initialized");}
 
-        //draw board
+        //draw the board
         //draw each cell, if a piece is there, draw it as well
         List<Move> possibleMoves = new ArrayList<>();
         if (gameState.getSelectedPiece() != null) {
