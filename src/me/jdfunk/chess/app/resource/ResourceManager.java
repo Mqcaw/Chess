@@ -16,7 +16,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-//TODO: ResourceManager should be reworked later
 public class ResourceManager {
     private static final Logger logger = Logger.getLogger(ResourceManager.class);
 
