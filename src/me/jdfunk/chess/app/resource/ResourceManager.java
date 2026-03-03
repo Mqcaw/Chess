@@ -8,6 +8,7 @@ import me.jdfunk.chess.shared.PieceType;
 import me.jdfunk.chess.shared.logger.Logger;
 
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -15,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.List;
 
 public class ResourceManager {
     private static final Logger logger = Logger.getLogger(ResourceManager.class);
@@ -83,6 +85,14 @@ public class ResourceManager {
             }
         }
     }
+
+    public static void cachePieceSetImages(String pieceSet, HashMap<String, BufferedImage> pieceImages) {
+        List<Path> paths = ResourceManager.getPathsForPieceSet(ResourceManager.getPieceSet(pieceSet));
+        for (Path path : paths) {
+            pieceImages.put(path.getFileName().toString(), ImageLoader.loadImage(String.valueOf(path)));
+        }
+    }
+
     private static void loadPieceSets() throws IOException {
         pieceSetCache.clear();
         if (!Files.exists(PIECES_DIR)) return;
@@ -95,6 +105,20 @@ public class ResourceManager {
                 }
             }
         }
+    }
+
+    public static List<Path> getPathsForPieceSet(PieceSet pieceSet) {
+        List<Path> paths = new ArrayList<>();
+        try {
+            Files.walk(pieceSet.getFolder()).forEach(path -> {
+                if (Files.isRegularFile(path)) {
+                    paths.add(path);
+                }
+            });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return paths;
     }
 
     public static Path getPathForPieceSet(PieceSet pieceSet, Piece piece) {

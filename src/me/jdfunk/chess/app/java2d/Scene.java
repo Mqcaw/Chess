@@ -25,6 +25,12 @@ public class Scene extends JPanel implements Runnable{
 
     private static final Logger logger = Logger.getLogger(Scene.class);
 
+    private long fpsSceneStartNs = System.nanoTime();
+    private int framesInScene = 0;
+    private volatile double lastFps = 0.0;
+    private static final long FPS_SCENE_NS = 150_000_000L; // 250ms update cadence
+
+
     public Scene(Java2DRenderer renderer, Engine game) throws Exception {
         //let swing use double buffering
         this.setDoubleBuffered(true);
@@ -74,7 +80,42 @@ public class Scene extends JPanel implements Runnable{
         super.paintComponent(g);
         renderer.setGraphics2D((Graphics2D) g);
         renderer.render();
+
+        framePresented();
+        drawFpsOverlay((Graphics2D) g);
     }
+
+    private void framePresented() {
+        framesInScene ++;
+        long nowNs = System.nanoTime();
+        long elapsedNs = nowNs - fpsSceneStartNs;
+
+        if (elapsedNs >= FPS_SCENE_NS) {
+            lastFps = framesInScene / (elapsedNs / 1_000_000_000.0);
+            fpsSceneStartNs = nowNs;
+            framesInScene = 0;
+        }
+    }
+
+    private void drawFpsOverlay(Graphics2D g2) {
+        String text = "FPS: " + Math.round(lastFps);
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 12f));
+        FontMetrics fm = g2.getFontMetrics();
+
+        int pad = 4;
+        int x = 0;
+        int y = 0;
+
+        int w = fm.stringWidth(text) + pad * 2;
+        int h = fm.getAscent() + fm.getDescent() + pad * 2;
+
+        g2.setColor(new Color(0, 0, 0, 160));
+        g2.fillRect(x, y, w, h);
+
+        g2.setColor((lastFps > 144) ? Color.WHITE : (lastFps > 100 ? Color.GREEN : (lastFps > 60 ? Color.YELLOW : Color.RED)));
+        g2.drawString(text, x + pad, y + pad + fm.getAscent());
+    }
+
 
     @Override
     public Dimension getPreferredSize() {
