@@ -1,4 +1,4 @@
-package me.jdfunk.chess.shared.events;
+package me.jdfunk.chess.shared.event;
 
 import me.jdfunk.chess.shared.annotations.EventHandler;
 

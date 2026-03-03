@@ -1,4 +1,4 @@
-package me.jdfunk.chess.engine.piece;
+package me.jdfunk.chess.shared;
 
 public enum PieceColor {
     WHITE,

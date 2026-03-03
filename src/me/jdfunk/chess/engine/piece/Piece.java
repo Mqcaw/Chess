@@ -3,6 +3,8 @@ package me.jdfunk.chess.engine.piece;
 import me.jdfunk.chess.engine.game.Board;
 import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
+import me.jdfunk.chess.shared.PieceColor;
+import me.jdfunk.chess.shared.PieceType;
 
 import java.util.ArrayList;
 import java.util.List;

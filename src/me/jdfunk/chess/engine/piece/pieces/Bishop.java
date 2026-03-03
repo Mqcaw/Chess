@@ -4,8 +4,8 @@ import me.jdfunk.chess.engine.game.Board;
 import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
 import me.jdfunk.chess.engine.piece.Piece;
-import me.jdfunk.chess.engine.piece.PieceColor;
-import me.jdfunk.chess.engine.piece.PieceType;
+import me.jdfunk.chess.shared.PieceColor;
+import me.jdfunk.chess.shared.PieceType;
 
 import java.util.List;
 

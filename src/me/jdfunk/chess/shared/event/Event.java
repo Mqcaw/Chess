@@ -1,4 +1,4 @@
-package me.jdfunk.chess.shared.events;
+package me.jdfunk.chess.shared.event;
 
 public abstract class Event {
     private boolean isCancelled;

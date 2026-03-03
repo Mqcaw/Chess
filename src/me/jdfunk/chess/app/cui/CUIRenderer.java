@@ -1,23 +1,27 @@
-package me.jdfunk.chess.app;
+package me.jdfunk.chess.app.cui;
 
+import me.jdfunk.chess.app.Renderer;
+import me.jdfunk.chess.engine.Engine;
 import me.jdfunk.chess.engine.game.GameState;
 import me.jdfunk.chess.engine.game.Move;
 import me.jdfunk.chess.engine.game.Position;
 import me.jdfunk.chess.engine.logic.MoveValidator;
 import me.jdfunk.chess.engine.piece.Piece;
-import me.jdfunk.chess.engine.piece.PieceColor;
+import me.jdfunk.chess.shared.PieceColor;
 import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class CUIRenderer extends Renderer{
+public class CUIRenderer extends Renderer {
     private static final Logger logger = Logger.getLogger(CUIRenderer.class);
 
+    private Engine game;
     private boolean initialized;
 
     @Override
-    public void init() {
+    public void init(Engine game) {
+        this.game = game;
         initialized = true;
     }
 
@@ -27,7 +31,8 @@ public class CUIRenderer extends Renderer{
     }
 
     @Override
-    public void render(GameState gameState) {
+    public void render() {
+        GameState gameState = game.getGameState();
         if (!initialized) {logger.error("CUI Renderer not initialized");}
 
         //draw the board

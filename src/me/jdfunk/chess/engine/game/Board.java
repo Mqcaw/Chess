@@ -2,8 +2,9 @@ package me.jdfunk.chess.engine.game;
 
 import me.jdfunk.chess.engine.logic.MoveValidator;
 import me.jdfunk.chess.engine.piece.Piece;
-import me.jdfunk.chess.engine.piece.PieceColor;
+import me.jdfunk.chess.shared.PieceColor;
 import me.jdfunk.chess.engine.piece.pieces.*;
+import me.jdfunk.chess.shared.PieceType;
 import me.jdfunk.chess.shared.logger.Logger;
 
 import java.util.ArrayList;
@@ -70,7 +71,7 @@ public class Board {
         // Castling handling based on coordinates rather than move's piece references.
         // (King moves two squares horizontally.)
         int dx = move.getTo().getX() - move.getFrom().getX();
-        if (moving.getType() == me.jdfunk.chess.engine.piece.PieceType.KING && Math.abs(dx) == 2) {
+        if (moving.getType() == PieceType.KING && Math.abs(dx) == 2) {
             boolean kingside = dx > 0;
             int rookFromX = kingside ? 7 : 0;
             int rookToX = kingside ? move.getTo().getX() - 1 : move.getTo().getX() + 1;
