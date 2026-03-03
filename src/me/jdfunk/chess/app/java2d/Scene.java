@@ -3,6 +3,8 @@ package me.jdfunk.chess.app.java2d;
 import me.jdfunk.chess.app.resource.Config;
 import me.jdfunk.chess.engine.Engine;
 import me.jdfunk.chess.engine.game.GameState;
+import me.jdfunk.chess.engine.game.Position;
+import me.jdfunk.chess.shared.PieceType;
 import me.jdfunk.chess.shared.event.EventBus;
 import me.jdfunk.chess.shared.logger.Logger;
 
@@ -67,6 +69,7 @@ public class Scene extends JPanel implements Runnable{
     @Override
     public void run() {
         while (isRunning) {
+            game.update();
             repaint();
             try {
                 long ms = (long) ((1.0f / Config.targetFrameRate) * 1000.0f);
@@ -81,8 +84,71 @@ public class Scene extends JPanel implements Runnable{
         renderer.setGraphics2D((Graphics2D) g);
         renderer.render();
 
+        if (game.isAwaitingPromotion()) {
+            drawPromotionOverlay((Graphics2D) g);
+        }
+
         framePresented();
         drawFpsOverlay((Graphics2D) g);
+    }
+
+    private void drawPromotionOverlay(Graphics2D g2) {
+        int w = getWidth();
+        int h = getHeight();
+
+        int zoneSize = Config.defaultCellSizePixels;
+        int gap = 8;
+
+        int totalW = zoneSize * 4 + gap * 3;
+        int x0 = (w - totalW) / 2;
+        int y0 = (h - zoneSize) / 2;
+
+        g2.setColor(new Color(0, 0, 0, 180));
+        g2.fillRect(0, 0, w, h);
+
+        drawPromotionZone(g2, new Rectangle(x0 + (zoneSize + gap) * 0, y0, zoneSize, zoneSize), "Q");
+        drawPromotionZone(g2, new Rectangle(x0 + (zoneSize + gap) * 1, y0, zoneSize, zoneSize), "R");
+        drawPromotionZone(g2, new Rectangle(x0 + (zoneSize + gap) * 2, y0, zoneSize, zoneSize), "B");
+        drawPromotionZone(g2, new Rectangle(x0 + (zoneSize + gap) * 3, y0, zoneSize, zoneSize), "N");
+    }
+
+    private void drawPromotionZone(Graphics2D g2, Rectangle r, String label) {
+        g2.setColor(new Color(240, 240, 240, 230));
+        g2.fillRoundRect(r.x, r.y, r.width, r.height, 12, 12);
+
+        g2.setColor(Color.BLACK);
+        g2.drawRoundRect(r.x, r.y, r.width, r.height, 12, 12);
+
+        Font f = g2.getFont().deriveFont(Font.BOLD, 18f);
+        g2.setFont(f);
+        FontMetrics fm = g2.getFontMetrics();
+        int tx = r.x + (r.width - fm.stringWidth(label)) / 2;
+        int ty = r.y + (r.height - fm.getHeight()) / 2 + fm.getAscent();
+        g2.drawString(label, tx, ty);
+    }
+
+    private PieceType promotionHitTest(int mouseX, int mouseY) {
+        int w = getWidth();
+        int h = getHeight();
+
+        int zoneSize = Config.defaultCellSizePixels;
+        int gap = 8;
+
+        int totalW = zoneSize * 4 + gap * 3;
+        int x0 = (w - totalW) / 2;
+        int y0 = (h - zoneSize) / 2;
+
+        Rectangle q = new Rectangle(x0 + (zoneSize + gap) * 0, y0, zoneSize, zoneSize);
+        Rectangle r = new Rectangle(x0 + (zoneSize + gap) * 1, y0, zoneSize, zoneSize);
+        Rectangle b = new Rectangle(x0 + (zoneSize + gap) * 2, y0, zoneSize, zoneSize);
+        Rectangle n = new Rectangle(x0 + (zoneSize + gap) * 3, y0, zoneSize, zoneSize);
+
+        Point p = new Point(mouseX, mouseY);
+        if (q.contains(p)) return PieceType.QUEEN;
+        if (r.contains(p)) return PieceType.ROOK;
+        if (b.contains(p)) return PieceType.BISHOP;
+        if (n.contains(p)) return PieceType.KNIGHT;
+        return null;
     }
 
     private void framePresented() {
@@ -117,6 +183,8 @@ public class Scene extends JPanel implements Runnable{
     }
 
 
+
+
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(size, size);
@@ -126,22 +194,57 @@ public class Scene extends JPanel implements Runnable{
         MouseAdapter mouseHandler = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                game.handleMouseClick(e.getX(), e.getY(), e.getButton());
+                if (game.isAwaitingPromotion() && SwingUtilities.isLeftMouseButton(e)) {
+                    PieceType hit = promotionHitTest(e.getX(), e.getY());
+                    if (hit != null) {
+                        game.choosePromotion(hit);
+                        return;
+                    }
+                    return;
+                }
+
+                Position cell = new Position(e.getX() / Config.defaultCellSizePixels, 7 - (e.getY() / Config.defaultCellSizePixels));
+                game.handleMousePressed(cell, e.getButton());
+
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    renderer.setDraggingButton1(true);
+                    renderer.setDragX(e.getX());
+                    renderer.setDragY(e.getY());
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                if (game.isAwaitingPromotion()) return;
 
+                Position cell = new Position(e.getX() / Config.defaultCellSizePixels, 7 - (e.getY() / Config.defaultCellSizePixels));
+                game.handleMouseReleased(cell, e.getButton());
+
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    renderer.setDraggingButton1(false);
+                    renderer.setDragX(-1);
+                    renderer.setDragY(-1);
+                }
             }
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (game.isAwaitingPromotion()) return;
 
+                Position cell = new Position(e.getX() / Config.defaultCellSizePixels, 7 - (e.getY() / Config.defaultCellSizePixels));
+                if (renderer.isDraggingButton1()) {
+                    renderer.setDragX(e.getX());
+                    renderer.setDragY(e.getY());
+                }
+                game.handleMouseDragged(cell);
             }
 
             @Override
             public void mouseMoved(MouseEvent e) {
+                if (game.isAwaitingPromotion()) return;
 
+                Position cell = new Position(e.getX() / Config.defaultCellSizePixels, 7 - (e.getY() / Config.defaultCellSizePixels));
+                game.handleMouseMoved(cell);
             }
         };
 
@@ -149,8 +252,19 @@ public class Scene extends JPanel implements Runnable{
         this.addMouseMotionListener(mouseHandler);
     }
 
+    private Position cellFromPixels(int x, int y) {
+        return new Position(
+                x / Config.defaultCellSizePixels,
+                7 - (y / Config.defaultCellSizePixels)
+        );
+    }
+
     public GameState getGameState() {
         return game.getGameState();
+    }
+
+    public Engine getEngine() {
+        return game;
     }
 
     public int getSceneSize() {

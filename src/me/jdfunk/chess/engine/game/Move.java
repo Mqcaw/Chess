@@ -1,6 +1,7 @@
 package me.jdfunk.chess.engine.game;
 
 import me.jdfunk.chess.engine.piece.Piece;
+import me.jdfunk.chess.shared.PieceType;
 
 import java.util.Objects;
 
@@ -13,6 +14,7 @@ public class Move {
     private boolean isCastling = false;
     private Piece rookMoved = null;
     private boolean isEnPassant = false;
+    private PieceType promotionType = null;
 
     //regular move
     public Move(Position from, Position to, Piece movingPiece, Piece capturedPiece) {
@@ -40,8 +42,18 @@ public class Move {
         this.movingPiece = movingPiece;
         this.capturedPiece = capturedPiece;
         this.isCapture = capturedPiece != null;
-        this.isCastling = capturedPiece != null;
+        this.isCastling = true;
         this.rookMoved = rookMoved;
+    }
+
+    //promotion move
+    public Move(Position from, Position to, Piece movingPiece, Piece capturedPiece, PieceType promotionType, boolean ignored) {
+        this.from = from;
+        this.to = to;
+        this.movingPiece = movingPiece;
+        this.capturedPiece = capturedPiece;
+        this.isCapture = capturedPiece != null;
+        this.promotionType = promotionType;
     }
 
     public Position getFrom() {
@@ -100,15 +112,33 @@ public class Move {
         isEnPassant = enPassant;
     }
 
+    public PieceType getPromotionType() {
+        return promotionType;
+    }
+    public void setPromotionType(PieceType promotionType) {
+        this.promotionType = promotionType;
+    }
+    public boolean isPromotion() {
+        return promotionType != null;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Move move = (Move) o;
-        return isCapture() == move.isCapture() && isCastling() == move.isCastling() && isEnPassant() == move.isEnPassant() && Objects.equals(getFrom(), move.getFrom()) && Objects.equals(getTo(), move.getTo()) && Objects.equals(getMovingPiece(), move.getMovingPiece()) && Objects.equals(getCapturedPiece(), move.getCapturedPiece()) && Objects.equals(getRookMoved(), move.getRookMoved());
+        return isCapture() == move.isCapture()
+                && isCastling() == move.isCastling()
+                && isEnPassant() == move.isEnPassant()
+                && Objects.equals(getFrom(), move.getFrom())
+                && Objects.equals(getTo(), move.getTo())
+                && Objects.equals(getMovingPiece(), move.getMovingPiece())
+                && Objects.equals(getCapturedPiece(), move.getCapturedPiece())
+                && Objects.equals(getRookMoved(), move.getRookMoved())
+                && getPromotionType() == move.getPromotionType();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getFrom(), getTo(), isCapture(), getMovingPiece(), getCapturedPiece(), isCastling(), getRookMoved(), isEnPassant());
+        return Objects.hash(getFrom(), getTo(), isCapture(), getMovingPiece(), getCapturedPiece(), isCastling(), getRookMoved(), isEnPassant(), getPromotionType());
     }
 }

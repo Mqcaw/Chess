@@ -32,7 +32,7 @@ public class MoveValidator {
         return legal;
     }
 
-    public List<Move> getAllLegalMoves(PieceColor color, Board board) {
+    public static List<Move> getAllLegalMoves(PieceColor color, Board board) {
         List<Move> legal = new ArrayList<>();
         for (Piece piece : board.getPieces()) {
             if (piece.getColor() == color) {
@@ -67,7 +67,7 @@ public class MoveValidator {
                 .getPosition();
     }
 
-    public boolean isInCheck(PieceColor color, Board board) {
+    public static boolean isInCheck(PieceColor color, Board board) {
         Position kingPos = findKing(color, board);
         return isSquareAttacked(kingPos, color, board);
     }

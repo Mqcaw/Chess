@@ -41,17 +41,21 @@ public class Board {
         pieces.add(new Rook(new Position(7, 0), PieceColor.WHITE));
 
         for (int i = 0; i < 8; i++) {
-            pieces.add(new Pawn(new Position(i, 6), PieceColor.BLACK));
+            //pieces.add(new Pawn(new Position(i, 6), PieceColor.BLACK));
         }
 
+        /*
         pieces.add(new Rook(new Position(0, 7), PieceColor.BLACK));
         pieces.add(new Knight(new Position(1, 7), PieceColor.BLACK));
         pieces.add(new Bishop(new Position(2, 7), PieceColor.BLACK));
         pieces.add(new Queen(new Position(3, 7), PieceColor.BLACK));
-        pieces.add(new King(new Position(4, 7), PieceColor.BLACK));
+
         pieces.add(new Bishop(new Position(5, 7), PieceColor.BLACK));
         pieces.add(new Knight(new Position(6, 7), PieceColor.BLACK));
         pieces.add(new Rook(new Position(7, 7), PieceColor.BLACK));
+
+         */
+        pieces.add(new King(new Position(4, 7), PieceColor.BLACK));
     }
 
     public boolean applyMoveUnchecked(Move move) {
@@ -61,9 +65,15 @@ public class Board {
             logger.error("No moving piece found at " + move.getFrom(), new Exception("No moving piece found at " + move.getFrom() + " during applyMoveUnchecked"));
         }
 
-        Piece captured = getPieceAt(move.getTo());
-        if (captured != null) {
-            removePieceAt(captured.getPosition());
+        // Capture handling
+        if (move.isEnPassant()) {
+            // En passant capture: captured pawn is on the file of 'to' and the rank of 'from'
+            removePieceAt(new Position(move.getTo().getX(), move.getFrom().getY()));
+        } else {
+            Piece captured = getPieceAt(move.getTo());
+            if (captured != null) {
+                removePieceAt(captured.getPosition());
+            }
         }
 
         moving.setPosition(move.getTo());
@@ -80,6 +90,24 @@ public class Board {
             if (rook != null) {
                 rook.setPosition(new Position(rookToX, move.getFrom().getY()));
             }
+        }
+
+        // Promotion handling
+        if (move.isPromotion()) {
+            PieceColor color = moving.getColor();
+            Position at = move.getTo();
+
+            removePieceAt(at); // remove the pawn that just moved there
+
+            Piece promoted = switch (move.getPromotionType()) {
+                case QUEEN -> new Queen(at, color);
+                case ROOK -> new Rook(at, color);
+                case BISHOP -> new Bishop(at, color);
+                case KNIGHT -> new Knight(at, color);
+                default -> throw new IllegalStateException("Invalid promotion type: " + move.getPromotionType());
+            };
+            promoted.setHasMoved(true);
+            pieces.add(promoted);
         }
 
         moves.add(move);
@@ -125,7 +153,6 @@ public class Board {
     }
 
     public Piece getPieceAt(Position position) {
-        //return pieces.stream().filter(p -> p.getPosition().equals(position)).findFirst().orElse(null);
         for (Piece piece : pieces) {
             if (piece.getPosition().equals(position)) {
                 return piece;

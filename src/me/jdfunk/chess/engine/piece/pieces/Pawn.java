@@ -22,12 +22,14 @@ public class Pawn extends Piece {
         Position pos = getPosition();
         int dir = getColor() == PieceColor.WHITE ? 1 : -1;
 
+        int promotionRank = (getColor() == PieceColor.WHITE) ? 7 : 0;
+
         //Single push
         Position oneStep = pos.offset(0, dir);
         if (board.isWithinBounds(oneStep) && board.getPieceAt(oneStep) == null) {
-            moves.add(new Move(pos, oneStep, this, null));
+            addPawnMoveOrPromotions(moves, pos, oneStep, null, promotionRank);
 
-            //Double push
+            //Double push (cannot be a promotion)
             int startRank = getColor() == PieceColor.WHITE ? 1 : 6;
             if (pos.getY() == startRank) {
                 Position twoStep = pos.offset(0, dir * 2);
@@ -44,10 +46,10 @@ public class Pawn extends Piece {
 
             Piece target = board.getPieceAt(capturePos);
             if (target != null && target.getColor() != getColor()) {
-                moves.add(new Move(pos, capturePos, this, target));
+                addPawnMoveOrPromotions(moves, pos, capturePos, target, promotionRank);
             }
 
-            //En passant
+            //En passant (cannot be a promotion in standard chess)
             Move lastMove = null;
             if (board.getMoves().size() != 0) {
                 lastMove = board.getLastMove();
@@ -64,5 +66,17 @@ public class Pawn extends Piece {
         }
 
         return moves;
+    }
+
+    private void addPawnMoveOrPromotions(List<Move> out, Position from, Position to, Piece captured, int promotionRank) {
+        if (to.getY() == promotionRank) {
+            for (PieceType promo : new PieceType[]{PieceType.QUEEN, PieceType.ROOK, PieceType.BISHOP, PieceType.KNIGHT}) {
+                Move m = new Move(from, to, this, captured);
+                m.setPromotionType(promo);
+                out.add(m);
+            }
+        } else {
+            out.add(new Move(from, to, this, captured));
+        }
     }
 }

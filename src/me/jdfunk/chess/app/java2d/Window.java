@@ -60,6 +60,10 @@ public class Window {
         logger.trace("UI loaded.");
     }
 
+    public Engine getEngine() {
+        return scene.getEngine();
+    }
+
     public GameState getGameState() {
         return scene.getGameState();
     }

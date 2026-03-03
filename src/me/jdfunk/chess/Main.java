@@ -25,7 +25,7 @@ public class Main {
         }
 
         Engine game = new Engine();
-        game.getGameState().selectPiece(new Position(4, 1));
+        //game.getGameState().selectPiece(new Position(4, 1));
 
         //debug renderer
         Renderer cui = new CUIRenderer();
